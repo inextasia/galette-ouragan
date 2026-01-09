@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALERTE TEMPÊTE - CESI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .container {
+            z-index: 10;
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 650px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            transition: transform 0.1s;
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 900;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, #f39c12);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .storm-banner {
+            background: var(--danger);
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-weight: 900;
+            display: inline-block;
+            margin: 20px 0;
+            animation: flash 0.5s infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .counter {
+            font-size: 1.1rem;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .galette-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 30px auto;
+        }
+
+        .galette {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 0 50px rgba(243, 156, 18, 0.4);
+            animation: wildWind 8s infinite linear;
+            border: 5px solid #f39c12;
+        }
+
+        @keyframes wildWind {
+            0% { transform: translate(0,0) rotate(0deg); }
+            20% { transform: translate(100px, -50px) rotate(90deg) scale(0.8); }
+            40% { transform: translate(-150px, -100px) rotate(180deg) scale(1.2); }
+            60% { transform: translate(200vw, -200vh) rotate(720deg); }
+            60.1% { transform: translate(-100vw, 100vh); }
+            80% { transform: translate(50px, 50px) rotate(360deg) scale(0.9); }
+            100% { transform: translate(0,0) rotate(0deg); }
+        }
+
+        .btn-wrapper {
+            position: relative;
+            height: 80px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: #f39c12;
+            color: black;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 1.2rem;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 0 #d35400;
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            box-shadow: 0 0 0;
+            margin-top: 10px;
+        }
+
+        /* Effets météo */
+        .wind-particle {
+            position: absolute;
+            background: white;
+            height: 2px;
+            border-radius: 2px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .rain-drop {
+            position: absolute;
+            background: rgba(255,255,255,0.4);
+            width: 1px;
+            height: 40px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-box">
+        <h1>VIGILANCE ROUGE</h1>
+        <div class="storm-banner">💩 TEMPÊTE DE FRANGIPANE 💩</div>
+        
+        <p>Le drone de livraison CESI a été détourné par des vents de 180km/h.<br>La galette est actuellement en orbite au-dessus de l'A13.</p>
+        
+        <div class="counter">Tentatives de sauvetage échouées : <span id="fail-count" style="color:var(--primary); font-weight:900">0</span></div>
+
+        <div class="galette-container">
+            <img src="galette.png" class="galette" id="galette">
+        </div>
+
+        <div class="btn-wrapper">
+            <button class="btn" id="run-btn">SAUVER LA GALETTE</button>
+        </div>
+    </div>
+
+    <script>
+        let fails = 0;
+        const btn = document.getElementById('run-btn');
+        const box = document.getElementById('main-box');
+        const countDisplay = document.getElementById('fail-count');
+
+        // LE BOUTON QUI FAIT UNE BLAGUE (S'ENFUIT)
+        btn.addEventListener('mouseover', () => {
+            fails++;
+            countDisplay.innerText = fails;
+
+            // Déplacement aléatoire
+            const newX = (Math.random() - 0.5) * 500;
+            const newY = (Math.random() - 0.5) * 400;
+            
+            btn.style.transform = `translate(${newX}px, ${newY}px) rotate(${Math.random() * 20 - 10}deg)`;
+            
+            // Secousse de l'écran
+            box.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+            
+            if (fails % 5 === 0) {
+                btn.innerText = ["TROP LENT !", "OUPS !", "À CÔTÉ !", "EH NON !", "ESSAIE ENCORE !"][Math.floor(Math.random()*5)];
+            }
+        });
+
+        // Si par miracle ils cliquent
+        btn.addEventListener('click', () => {
+            alert("ERREUR 404 : Galette déjà mangée par le vent.");
+            window.location.reload();
+        });
+
+        // Génération météo
+        function createWeather() {
+            for(let i=0; i<40; i++) {
+                let w = document.createElement('div');
+                w.className = 'wind-particle';
+                w.style.width = Math.random() * 200 + 'px';
+                w.style.left = '-200px';
+                w.style.top = Math.random() * 100 + 'vh';
+                document.body.appendChild(w);
+                
+                let anime = w.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(120vw)' }
+                ], {
+                    duration: Math.random() * 1000 + 500,
+                    iterations: Infinity,
+                    delay: Math.random() * 2000
+                });
+            }
+
+            for(let i=0; i<60; i++) {
+                let r = document.createElement('div');
+                r.className = 'rain-drop';
+                r.style.left = Math.random() * 100 + 'vw';
+                r.style.top = -50 + 'px';
+                document.body.appendChild(r);
+                
+                r.animate([
+                    { transform: 'translateY(0) rotate(20deg)' },
+                    { transform: 'translateY(110vh) rotate(20deg)' }
+                ], {
+                    duration: Math.random() * 400 + 300,
+                    iterations: Infinity,
+                    delay: Math.random() * 2000
+                });
+            }
+        }
+        createWeather();
+    </script>
+</body>
+</html>
